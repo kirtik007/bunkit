@@ -1256,7 +1256,7 @@ function renderSubjectGradePlanner(sem, sub) {
   const maxEndSem = 100 - total;
   
   let html = `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
       <h4 style="margin: 0; font-weight: 700; font-size: 1rem; color: var(--accent-primary);">🎯 Target Grade Planner</h4>
       <span style="font-size: 0.8125rem; color: var(--text-secondary);">
         Internals: <strong>${score} / ${total}</strong> | End-Sem max: <strong>${maxEndSem} marks</strong>
@@ -1268,9 +1268,9 @@ function renderSubjectGradePlanner(sem, sub) {
         <thead>
           <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-muted);">
             <th style="padding: 8px 12px; font-weight: 600;">Grade</th>
-            <th style="padding: 8px 12px; font-weight: 600;">Required Total %</th>
-            <th style="padding: 8px 12px; font-weight: 600;">End-Sem Marks Needed</th>
-            <th style="padding: 8px 12px; font-weight: 600;">Required Exam %</th>
+            <th style="padding: 8px 12px; font-weight: 600;"><span class="hide-on-mobile">Required Total </span>%</th>
+            <th style="padding: 8px 12px; font-weight: 600;">End-Sem<span class="hide-on-mobile"> Needed</span></th>
+            <th style="padding: 8px 12px; font-weight: 600;"><span class="hide-on-mobile">Exam </span>%</th>
           </tr>
         </thead>
         <tbody>
@@ -1288,7 +1288,7 @@ function renderSubjectGradePlanner(sem, sub) {
     let rowStyle = '';
 
     if (maxEndSem <= 0) {
-      marksText = '<span style="color:var(--danger)">Error (Total is 100)</span>';
+      marksText = '<span style="color:var(--danger)">Error<span class="hide-on-mobile"> (Total is 100)</span></span>';
       percentText = '—';
     } else {
       let rawReq100 = Math.ceil((reqMarks / maxEndSem) * 100);
@@ -1305,15 +1305,15 @@ function renderSubjectGradePlanner(sem, sub) {
         percentText = '—';
         rowStyle = 'opacity: 0.6;';
       } else {
-        marksText = `<strong>${rawReq100}${isClamped ? '<span style="color:var(--accent-primary)">*</span>' : ''}</strong> / 100`;
+        marksText = `<strong>${rawReq100}${isClamped ? '<span style="color:var(--accent-primary)">*</span>' : ''}</strong><span class="hide-on-mobile"> / 100</span>`;
         percentText = `<strong>${rawReq100}%</strong>`;
       }
     }
 
     html += `
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); ${rowStyle}">
-        <td style="padding: 10px 12px; font-weight: 600; color: var(--text-primary);">${g.label} (${g.label === 'O' ? 'Outstanding' : g.label === 'A+' ? 'Excellent' : g.label === 'A' ? 'Very Good' : g.label === 'B+' ? 'Good' : g.label === 'B' ? 'Average' : 'Satisfactory'})</td>
-        <td style="padding: 10px 12px; color: var(--text-secondary);">${g.min} – ${g.max}%</td>
+        <td style="padding: 10px 12px; font-weight: 600; color: var(--text-primary);">${g.label} <span class="hide-on-mobile" style="font-weight: normal; color: var(--text-muted); font-size: 0.8em;">(${g.label === 'O' ? 'Outstanding' : g.label === 'A+' ? 'Excellent' : g.label === 'A' ? 'Very Good' : g.label === 'B+' ? 'Good' : g.label === 'B' ? 'Average' : 'Satisfactory'})</span></td>
+        <td style="padding: 10px 12px; color: var(--text-secondary);">${g.min}<span class="hide-on-mobile"> – ${g.max}</span>%</td>
         <td style="padding: 10px 12px;">${marksText}</td>
         <td style="padding: 10px 12px; color: var(--text-secondary);">${percentText}</td>
       </tr>
@@ -1445,10 +1445,13 @@ function renderMarkAttendance() {
   const semSelect = $('attendance-semester-select');
   if (!dateInput.value) dateInput.value = getTodayStr();
 
-  semSelect.innerHTML = userData.semesters.map(s =>
+  const today = getTodayStr();
+  const activeSemesters = userData.semesters.filter(s => !s.isHistorical && s.endDate >= today);
+  
+  semSelect.innerHTML = activeSemesters.map(s =>
     `<option value="${s.id}" ${s.id === currentSemesterId ? 'selected' : ''}>${s.name}</option>`
   ).join('');
-  if (userData.semesters.length === 0) semSelect.innerHTML = '<option value="">No semesters</option>';
+  if (activeSemesters.length === 0) semSelect.innerHTML = '<option value="">No active semesters</option>';
   updateAttendanceList();
 }
 

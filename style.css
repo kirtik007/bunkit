@@ -636,6 +636,7 @@ p { color: var(--text-secondary); }
 /* ── Main Content ── */
 #content {
   flex: 1;
+  min-width: 0;
   margin-left: var(--sidebar-width);
   padding: 40px;
   padding-bottom: 100px;
@@ -2117,6 +2118,10 @@ p { color: var(--text-secondary); }
   .gpa-subjects-table th,
   .gpa-subjects-table td {
     padding: 8px 10px;
+  }
+
+  .hide-on-mobile {
+    display: none !important;
   }
 
   .modal-content {

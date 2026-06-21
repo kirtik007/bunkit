@@ -1,0 +1,9 @@
+{
+  "name": "bunkit",
+  "version": "1.0.0",
+  "description": "College Attendance Tracker & GPA Calculator",
+  "scripts": {
+    "dev": "npx -y serve .",
+    "start": "npx -y serve ."
+  }
+}

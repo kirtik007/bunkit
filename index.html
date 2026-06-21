@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Bunkit — College Attendance Tracker</title>
+  <meta name="description" content="Track your college attendance, manage timetables, calculate GPA, and stay on top of academics with Bunkit.">
+  
+  <!-- PWA & iOS Web App Support -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0b0d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Bunkit">
+  <link rel="apple-touch-icon" href="icon-512.png">
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="icon-192.png">
+</head>
+<body>
+
+  <!-- ═══════════════ AUTH SCREEN ═══════════════ -->
+  <div id="auth-screen">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <div class="auth-logo-icon" style="background:transparent; box-shadow:none;"><img src="icon-192.png" alt="Bunkit" style="width:100%; height:100%; border-radius:inherit; object-fit:contain;"></div>
+          <h1>Bunkit</h1>
+          <p>Your college attendance companion</p>
+        </div>
+
+        <div class="auth-tabs" id="auth-tabs">
+          <button class="auth-tab active" data-tab="login" id="tab-login">Login</button>
+          <button class="auth-tab" data-tab="register" id="tab-register">Register</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form class="auth-form" id="login-form" autocomplete="off">
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email Address</label>
+            <input type="email" class="form-input" id="login-email" placeholder="you@college.edu" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <input type="password" class="form-input" id="login-password" placeholder="Enter password" required>
+          </div>
+          <div style="text-align: right; margin-top: -8px;">
+            <a href="#" id="link-forgot-password" style="font-size: 0.8125rem; color: var(--accent-cyan);">Forgot Password?</a>
+          </div>
+          <div id="login-error" class="form-error hidden"></div>
+          <button type="submit" class="btn btn-primary btn-full" id="btn-login">Login</button>
+          
+          <div style="display: flex; align-items: center; margin: 16px 0 12px; color: var(--text-secondary); font-size: 0.8125rem;">
+            <hr style="flex: 1; border: none; border-top: 1px solid rgba(255,255,255,0.08); margin-right: 8px;">
+            or
+            <hr style="flex: 1; border: none; border-top: 1px solid rgba(255,255,255,0.08); margin-left: 8px;">
+          </div>
+          <button type="button" class="btn btn-secondary btn-full" id="btn-login-with-otp">Login with Email OTP</button>
+        </form>
+
+        <!-- EMAIL OTP LOGIN FORM -->
+        <form class="auth-form hidden" id="otp-login-form" autocomplete="off">
+          <h3 style="margin-bottom: 4px; font-weight: 700;">Login with Email OTP</h3>
+          <p style="font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">
+            We will send a 6-digit OTP verification code to your email.
+          </p>
+          
+          <div class="form-group" id="otp-login-email-group">
+            <label class="form-label" for="otp-login-email">Email Address</label>
+            <input type="email" class="form-input" id="otp-login-email" placeholder="you@college.edu">
+            <button type="button" class="btn btn-primary btn-full" id="btn-send-login-otp" style="margin-top: 12px;">Send OTP</button>
+          </div>
+          
+          <div class="form-group hidden" id="otp-login-code-group">
+            <label class="form-label" style="text-align: center; display: block; margin-bottom: 12px;">Enter 6-Digit OTP</label>
+            <div class="otp-container" style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;">
+              <input type="text" class="form-input otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+              <input type="text" class="form-input otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+              <input type="text" class="form-input otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+              <input type="text" class="form-input otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+              <input type="text" class="form-input otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+              <input type="text" class="form-input otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="btn-verify-login-otp">Verify & Login</button>
+          </div>
+          
+          <div id="otp-login-error" class="form-error hidden" style="margin-top:12px;"></div>
+          <button type="button" class="btn btn-secondary btn-full" id="btn-cancel-otp-login" style="margin-top: 12px;">Back to Password Login</button>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form class="auth-form hidden" id="register-form" autocomplete="off">
+          <div class="form-group">
+            <label class="form-label" for="register-name">Full Name</label>
+            <input type="text" class="form-input" id="register-name" placeholder="John Doe" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="register-email">Email Address</label>
+            <input type="email" class="form-input" id="register-email" placeholder="you@college.edu" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="register-password">Password</label>
+            <input type="password" class="form-input" id="register-password" placeholder="Min 6 characters" required minlength="6">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="register-confirm">Confirm Password</label>
+            <input type="password" class="form-input" id="register-confirm" placeholder="Re-enter password" required>
+          </div>
+          <div id="register-error" class="form-error hidden"></div>
+          <button type="submit" class="btn btn-primary btn-full" id="btn-register">Create Account</button>
+        </form>
+
+        <!-- FORGOT PASSWORD FORM -->
+        <form class="auth-form hidden" id="forgot-password-form" autocomplete="off">
+          <h3 style="margin-bottom: 4px; font-weight: 700;">Reset Password</h3>
+          <p style="font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">
+            We will send a 6-digit OTP verification code to your email.
+          </p>
+          
+          <div class="form-group">
+            <label class="form-label" for="reset-email">Email Address</label>
+            <input type="email" class="form-input" id="reset-email" placeholder="you@college.edu" required>
+          </div>
+          
+          <!-- OTP Flow -->
+          <div id="forgot-otp-flow">
+            <button type="button" class="btn btn-primary btn-full" id="btn-send-reset-otp" style="margin-bottom: 12px;">Send 6-Digit OTP</button>
+            <div style="text-align: center; color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 12px; position: relative;">
+              <span style="background: var(--bg-surface); padding: 0 8px; position: relative; z-index: 1;">OR</span>
+              <div style="position: absolute; top: 50%; left: 0; right: 0; border-top: 1px solid var(--border-color); z-index: 0;"></div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-full" id="btn-send-reset-link">Send Reset Link</button>
+            
+            <div class="form-group hidden" id="forgot-otp-code-group" style="margin-top: 16px;">
+              <label class="form-label" style="text-align: center; display: block; margin-bottom: 12px;">Enter 6-Digit OTP</label>
+              <div class="otp-container" style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;">
+                <input type="text" class="form-input reset-otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+                <input type="text" class="form-input reset-otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+                <input type="text" class="form-input reset-otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+                <input type="text" class="form-input reset-otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+                <input type="text" class="form-input reset-otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+                <input type="text" class="form-input reset-otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+              </div>
+              <button type="button" class="btn btn-primary btn-full" id="btn-verify-reset-otp">Verify OTP</button>
+            </div>
+            
+            <!-- Password Reset inputs (shown after OTP verification) -->
+            <div class="hidden" id="forgot-otp-new-password-group" style="margin-top: 16px;">
+              <div class="form-group">
+                <label class="form-label" for="reset-new-password">New Password</label>
+                <input type="password" class="form-input" id="reset-new-password" placeholder="Min 6 characters" minlength="6">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reset-confirm-password">Confirm New Password</label>
+                <input type="password" class="form-input" id="reset-confirm-password" placeholder="Confirm password">
+              </div>
+              <button type="button" class="btn btn-primary btn-full" id="btn-submit-otp-reset">Update Password</button>
+            </div>
+          </div>
+          
+          <div id="reset-error" class="form-error hidden" style="margin-top: 12px;"></div>
+          <div id="reset-success" class="form-success hidden" style="color: var(--success); font-size: 0.8125rem; margin-top: 12px;"></div>
+          
+          <button type="button" class="btn btn-secondary btn-full" id="btn-back-to-login" style="margin-top: 16px;">Back to Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ MAIN APP ═══════════════ -->
+  <div id="app" class="hidden">
+
+    <!-- Mobile Nav Toggle -->
+    <button class="mobile-nav-toggle" id="mobile-nav-toggle">☰</button>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <nav id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="sidebar-brand-icon" style="background:transparent;"><img src="icon-192.png" alt="Bunkit" style="width:100%; height:100%; border-radius:inherit; object-fit:contain;"></div>
+          <div>
+            <h2>Bunkit</h2>
+            <p>College Tracker</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <div class="nav-item active" data-screen="dashboard" id="nav-dashboard">
+          <span class="nav-icon">🏠</span>
+          <span>Dashboard</span>
+        </div>
+        <div class="nav-item" data-screen="attendance" id="nav-attendance">
+          <span class="nav-icon">✅</span>
+          <span>Mark Attendance</span>
+        </div>
+
+        <div class="nav-section-label">Academics</div>
+        <div class="nav-item" data-screen="gpa" id="nav-gpa">
+          <span class="nav-icon">🎓</span>
+          <span>GPA Planner</span>
+        </div>
+
+
+        <div class="nav-section-label">Manage</div>
+        <div class="nav-item" data-screen="settings" id="nav-settings">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar" id="user-avatar">JD</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebar-user-name">John Doe</div>
+            <div class="user-email" id="sidebar-user-email">john@college.edu</div>
+          </div>
+          <button class="btn-logout" id="btn-logout" title="Logout">⏻</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Content Area -->
+    <main id="content">
+
+      <!-- ──── DASHBOARD ──── -->
+      <div class="screen active" id="dashboard-screen">
+        <div class="screen-header">
+          <div>
+            <h1><span class="icon">🏠</span> Dashboard</h1>
+            <p class="screen-subtitle" id="dashboard-greeting">Welcome back!</p>
+          </div>
+          <div class="screen-header-actions">
+            <button class="btn btn-primary" id="btn-new-semester">+ New Semester</button>
+          </div>
+        </div>
+
+        <!-- Alert Banners -->
+        <div id="dashboard-alerts"></div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid" id="dashboard-stats"></div>
+
+        <!-- Attendance Chart -->
+        <div class="card" id="dashboard-chart-card" style="margin-top: 24px; padding: 16px; display: none;">
+          <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-primary);">📊 Subject Analytics</h3>
+          <div style="position: relative; height: 250px; width: 100%;">
+            <canvas id="attendance-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Today's Classes -->
+        <div class="today-classes" id="today-classes-section">
+          <div class="section-header">
+            <h3>📅 Today's Classes</h3>
+            <button class="btn btn-sm btn-secondary" id="btn-mark-today">Mark Attendance</button>
+          </div>
+          <div id="today-classes-list"></div>
+        </div>
+
+        <!-- Semesters -->
+        <div class="section-header">
+          <h3>📚 Your Semesters</h3>
+        </div>
+        <div class="content-grid" id="semesters-grid"></div>
+      </div>
+
+      <!-- ──── SEMESTER VIEW ──── -->
+      <div class="screen" id="semester-screen">
+        <button class="back-btn" id="btn-back-dashboard">← Back to Dashboard</button>
+        <div class="screen-header">
+          <div>
+            <h1 id="semester-title">Semester 4</h1>
+            <p class="screen-subtitle" id="semester-dates"></p>
+          </div>
+          <div class="screen-header-actions">
+            <button class="btn btn-sm btn-secondary" id="btn-edit-semester">✏️ Edit</button>
+            <button class="btn btn-sm btn-danger" id="btn-delete-semester">🗑️ Delete</button>
+          </div>
+        </div>
+
+        <!-- Active/Standard Semester Content -->
+        <div id="standard-sem-view">
+          <!-- Semester Stats -->
+          <div class="stats-grid" id="semester-stats"></div>
+
+          <!-- Attendance Chart -->
+          <div class="card" id="semester-chart-card" style="margin-top: 24px; padding: 16px; display: none;">
+            <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-primary);">📊 Subject Analytics</h3>
+            <div style="position: relative; height: 250px; width: 100%;">
+              <canvas id="semester-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Subjects -->
+          <div class="section-header">
+            <h3>📚 Subjects</h3>
+            <button class="btn btn-sm btn-primary" id="btn-add-subject">+ Add Subject</button>
+          </div>
+          <div class="content-grid" id="subjects-grid"></div>
+
+          <div class="section-divider"></div>
+
+          <!-- Timetable -->
+          <div class="section-header">
+            <h3>🗓️ Weekly Timetable</h3>
+            <button class="btn btn-sm btn-secondary" id="btn-add-slot">+ Add Slot</button>
+          </div>
+          <div class="timetable-container" id="timetable-container"></div>
+
+          <div class="section-divider"></div>
+
+          <!-- Holidays -->
+          <div class="section-header">
+            <h3>🏖️ Holidays</h3>
+            <button class="btn btn-sm btn-secondary" id="btn-add-holiday">+ Add Holiday</button>
+          </div>
+          <div class="holiday-list" id="holidays-list"></div>
+        </div>
+      </div>
+
+      <!-- ──── SUBJECT DETAIL ──── -->
+      <div class="screen" id="subject-screen">
+        <button class="back-btn" id="btn-back-semester">← Back to Semester</button>
+        <div class="screen-header">
+          <div>
+            <h1 id="subject-title">Data Structures</h1>
+            <p class="screen-subtitle" id="subject-info" style="margin-bottom:8px;"></p>
+            <div style="display:flex; align-items:center; gap:8px;" id="detail-subject-grade-container">
+              <span style="font-size:0.875rem; color:var(--text-muted); font-weight:600;">Grade:</span>
+              <select class="form-select" id="detail-subject-grade-select" style="max-width:120px; padding:4px 8px; font-size:0.875rem;"></select>
+            </div>
+          </div>
+          <div class="screen-header-actions">
+            <button class="btn btn-sm btn-secondary" id="btn-edit-subject">✏️ Edit</button>
+            <button class="btn btn-sm btn-danger" id="btn-delete-subject">🗑️ Delete</button>
+          </div>
+        </div>
+
+        <!-- Subject Stats -->
+        <div class="stats-grid" id="subject-stats"></div>
+
+        <!-- Calculators -->
+        <div class="calc-cards" id="subject-calculators"></div>
+
+        <!-- Target Grade Planner -->
+        <div class="glass-card" id="subject-grade-planner" style="margin-top: 24px;"></div>
+
+        <div class="section-divider"></div>
+
+        <!-- Calendar -->
+        <div class="section-header">
+          <h3>📅 Attendance Calendar</h3>
+        </div>
+        <div class="glass-card">
+          <div class="calendar-container" id="subject-calendar"></div>
+          <div class="calendar-legend">
+            <div class="legend-item"><div class="legend-dot present"></div> Present</div>
+            <div class="legend-item"><div class="legend-dot absent"></div> Absent</div>
+            <div class="legend-item"><div class="legend-dot onduty"></div> On Duty</div>
+            <div class="legend-item"><div class="legend-dot medical"></div> Medical</div>
+            <div class="legend-item"><div class="legend-dot cancelled"></div> Cancelled</div>
+            <div class="legend-item"><div class="legend-dot holiday"></div> Holiday</div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Attendance Log -->
+        <div class="section-header">
+          <h3>📝 Attendance Log</h3>
+        </div>
+        <div class="glass-card">
+          <div class="attendance-log" id="subject-log"></div>
+        </div>
+      </div>
+
+      <!-- ──── MARK ATTENDANCE ──── -->
+      <div class="screen" id="attendance-screen">
+        <div class="screen-header">
+          <div>
+            <h1><span class="icon">✅</span> Mark Attendance</h1>
+            <p class="screen-subtitle">Mark your attendance for the day</p>
+          </div>
+        </div>
+
+        <div class="attendance-date-picker">
+          <div class="form-group">
+            <label class="form-label">Select Date</label>
+            <input type="date" class="form-input" id="attendance-date" style="max-width:200px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Semester</label>
+            <select class="form-select" id="attendance-semester-select" style="max-width:200px;"></select>
+          </div>
+        </div>
+
+        <div class="attendance-class-list" id="attendance-class-list"></div>
+
+        <div class="empty-state hidden" id="attendance-empty">
+          <div class="empty-state-icon">📭</div>
+          <h3>No classes scheduled</h3>
+          <p>There are no classes scheduled for this date. Check your timetable or select a different date.</p>
+        </div>
+
+        <div style="margin-top: 24px; text-align: center;">
+          <button class="btn btn-secondary" id="btn-add-extra-class" style="display: none;">+ Add Extra Class</button>
+        </div>
+      </div>
+
+      <!-- ──── GPA CALCULATOR ──── -->
+      <div class="screen" id="gpa-screen">
+        <div class="screen-header">
+          <div>
+            <h1><span class="icon">🎓</span> GPA Planner</h1>
+            <p class="screen-subtitle">Predict the required SGPA for your target Cumulative GPA (CGPA)</p>
+          </div>
+        </div>
+
+        <div class="auth-tabs" id="gpa-tabs" style="margin-bottom: 24px; max-width: 400px; display: flex;">
+          <button class="auth-tab active" data-tab="planner" id="tab-gpa-planner" style="flex: 1;">Target Planner</button>
+          <button class="auth-tab" data-tab="predictor" id="tab-gpa-predictor" style="flex: 1;">GPA Predictor</button>
+        </div>
+
+        <!-- Planner Section -->
+        <div class="gpa-section" id="gpa-planner-view">
+          <div class="glass-card mb-24">
+            <h4 class="mb-16">What SGPA do I need?</h4>
+            
+            <div style="padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+              <div style="flex: 1; padding-right: 16px;">
+                <label class="form-label" style="font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 4px;">Current CGPA</label>
+                <input type="number" class="form-input" id="planner-current-cgpa" placeholder="e.g. 7.5" step="0.01" min="0" max="10" style="font-size: 1.25rem; font-weight: 700; color: var(--accent-primary); background: transparent; border: 1px dashed rgba(255,255,255,0.2); padding: 4px;">
+              </div>
+              <div style="text-align: right; flex: 1;">
+                <div style="font-size: 0.8125rem; color: var(--text-secondary);">Completed Semesters</div>
+                <div style="font-size: 1.25rem; font-weight: 600; padding: 4px;" id="planner-display-sems">0</div>
+              </div>
+            </div>
+
+            <div class="form-row mt-8">
+              <div class="form-group" style="flex: 1;">
+                <label class="form-label">Target CGPA</label>
+                <input type="number" class="form-input" id="planner-target-cgpa" placeholder="e.g. 8.0" step="0.01" min="0" max="10">
+              </div>
+            </div>
+            <button class="btn btn-primary mt-16" id="btn-calculate-needed">Calculate</button>
+            <div id="planner-result" class="mt-16 hidden"></div>
+          </div>
+
+          <div class="glass-card mb-24">
+            <h4 class="mb-8">What will my CGPA be?</h4>
+            <p class="mb-16" style="font-size: 0.8125rem; color: var(--text-secondary);">Predict your final CGPA based on an expected SGPA for this semester.</p>
+            
+            <div class="form-row mt-8">
+              <div class="form-group" style="flex: 1;">
+                <label class="form-label">Expected SGPA</label>
+                <input type="number" class="form-input" id="planner-expected-sgpa" placeholder="e.g. 8.5" step="0.01" min="0" max="10">
+              </div>
+            </div>
+            <button class="btn btn-secondary mt-16" id="btn-calculate-future-cgpa">Calculate CGPA</button>
+            <div id="planner-cgpa-result" class="mt-16 hidden"></div>
+          </div>
+        </div>
+
+        <!-- Predictor Section -->
+        <div class="gpa-section hidden" id="gpa-predictor-view">
+          <!-- GPA Predictor Card -->
+          <div class="glass-card">
+            <h4 class="mb-8">GPA Predictor</h4>
+            <p class="mb-16" style="font-size: 0.8125rem; color: var(--text-secondary);">Predict GPA for a future semester or yet-to-be-announced results.</p>
+            
+            <div id="predictor-subjects-container" class="mb-16" style="display: flex; flex-direction: column; gap: 8px;"></div>
+
+            <div style="display: flex; gap: 8px;" id="predictor-actions">
+              <button class="btn btn-secondary btn-sm" id="btn-predictor-add">+ Add Subject</button>
+              <button class="btn btn-primary btn-sm hidden" id="btn-predictor-done">Done</button>
+              <button class="btn btn-primary btn-sm hidden" id="btn-predictor-calculate">Calculate</button>
+              <button class="btn btn-secondary btn-sm hidden" id="btn-predictor-edit">Edit Subjects</button>
+            </div>
+
+            <div class="gpa-result-card hidden" id="predictor-result-card" style="margin-top: 16px;">
+              <div class="gpa-result-value" id="predictor-sgpa-val">0.00</div>
+              <div class="gpa-result-label">Predicted Semester GPA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──── SETTINGS ──── -->
+      <div class="screen" id="settings-screen">
+        <div class="screen-header">
+          <div>
+            <h1><span class="icon">⚙️</span> Settings</h1>
+            <p class="screen-subtitle">Manage your preferences</p>
+          </div>
+        </div>
+
+        <div class="settings-section" id="pwa-install-section" style="display: none;">
+          <h3>📱 App Installation</h3>
+          <div class="settings-card" style="background: var(--gradient-primary); color: #fff; border: none;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="font-weight: 600; font-size: 1rem; margin-bottom: 4px;">Install Bunkit</div>
+                <div style="font-size: 0.875rem; opacity: 0.9;" id="pwa-install-text">Add to your home screen for the full app experience.</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-install-pwa" style="background: #fff; color: var(--accent-primary); border: none; white-space: nowrap;">Install App</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>🎨 Appearance</h3>
+          <div class="settings-card">
+            <div class="form-group mb-0">
+              <label class="form-label">App Theme</label>
+              <select class="form-select" id="settings-theme">
+                <option value="dark">Dark Mode (Default)</option>
+                <option value="light">Light Mode</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>👤 Profile</h3>
+          <div class="settings-card">
+            <div class="form-group mb-16">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-input" id="settings-name" placeholder="Your name">
+            </div>
+            <div class="form-group mb-16">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-input" id="settings-email" disabled placeholder="your@email.com">
+            </div>
+            <button class="btn btn-primary btn-sm" id="btn-save-profile">Save Changes</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>🎯 Attendance</h3>
+          <div class="settings-card">
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-label">Default Minimum Attendance</div>
+                <div class="settings-item-description">Applied to new semesters</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="number" class="form-input" id="settings-min-attendance" style="width:80px;text-align:center;" min="50" max="100" value="75">
+                <span class="text-secondary">%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>🔐 Account Security</h3>
+          <div class="settings-card" style="display:flex; flex-direction:column; gap:16px;">
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-label">Change Password</div>
+                <div class="settings-item-description">Update your login password</div>
+              </div>
+              <button class="btn btn-sm btn-secondary" id="btn-change-password">Change</button>
+            </div>
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-label">Change Email</div>
+                <div class="settings-item-description">Update your registered email address</div>
+              </div>
+              <button class="btn btn-sm btn-secondary" id="btn-change-email">Change</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>💾 Data Management</h3>
+          <div class="settings-card">
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-label">Export Data</div>
+                <div class="settings-item-description">Download all your data as a JSON file</div>
+              </div>
+              <button class="btn btn-sm btn-secondary" id="btn-export-data">📥 Export</button>
+            </div>
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-label">Import Data</div>
+                <div class="settings-item-description">Restore from a previously exported file</div>
+              </div>
+              <div>
+                <input type="file" id="import-file-input" accept=".json" class="hidden">
+                <button class="btn btn-sm btn-secondary" id="btn-import-data">📤 Import</button>
+              </div>
+            </div>
+            <div class="settings-item">
+              <div>
+                <div class="settings-item-label">Clear All Data</div>
+                <div class="settings-item-description">Permanently delete all your data</div>
+              </div>
+              <button class="btn btn-sm btn-danger" id="btn-clear-data">🗑️ Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+    </main>
+  </div>
+
+  <!-- ═══════════════ MODAL ═══════════════ -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-content" id="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Modal Title</h2>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TOASTS ═══════════════ -->
+  <div id="toast-container"></div>
+
+  <!-- ═══════════════ SCRIPTS ═══════════════ -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

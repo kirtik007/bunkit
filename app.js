@@ -1277,6 +1277,7 @@ function renderSubjectGradePlanner(sem, sub) {
   `;
 
   const activeGrades = GRADES.filter(g => g.label !== 'U');
+  let hasClampedGrade = false;
   
   activeGrades.forEach(g => {
     const minNeeded = g.min;
@@ -1289,18 +1290,24 @@ function renderSubjectGradePlanner(sem, sub) {
     if (maxEndSem <= 0) {
       marksText = '<span style="color:var(--danger)">Error (Total is 100)</span>';
       percentText = '—';
-    } else if (reqMarks <= 0) {
-      marksText = '<span style="color:var(--success); font-weight:600;">Secured! 🎉</span>';
-      percentText = '0%';
-      rowStyle = 'background: rgba(158,254,0,0.02);';
-    } else if (reqMarks > maxEndSem) {
-      marksText = '<span style="color:var(--text-muted)">Not Achievable</span>';
-      percentText = '—';
-      rowStyle = 'opacity: 0.6;';
     } else {
-      const pct = (reqMarks / maxEndSem) * 100;
-      marksText = `<strong>${reqMarks}</strong> / ${maxEndSem}`;
-      percentText = `<strong>${pct.toFixed(0)}%</strong>`;
+      let rawReq100 = Math.ceil((reqMarks / maxEndSem) * 100);
+      let isClamped = false;
+      
+      if (rawReq100 < 45) {
+        rawReq100 = 45;
+        isClamped = true;
+        hasClampedGrade = true;
+      }
+      
+      if (rawReq100 > 100) {
+        marksText = '<span style="color:var(--text-muted)">Not Achievable</span>';
+        percentText = '—';
+        rowStyle = 'opacity: 0.6;';
+      } else {
+        marksText = `<strong>${rawReq100}${isClamped ? '<span style="color:var(--accent-primary)">*</span>' : ''}</strong> / 100`;
+        percentText = `<strong>${rawReq100}%</strong>`;
+      }
     }
 
     html += `
@@ -1316,6 +1323,7 @@ function renderSubjectGradePlanner(sem, sub) {
   html += `
         </tbody>
       </table>
+      ${hasClampedGrade ? '<div style="margin-top: 12px; font-size: 0.8rem; color: var(--text-secondary);">* Minimum <strong>45/100</strong> is required in the End-Sem exam to pass.</div>' : ''}
     </div>
   `;
   container.innerHTML = html;
@@ -2951,59 +2959,7 @@ function initEventListeners() {
 }
 
 // ─── Firebase Auth State Listener ───
-function showOnboardingModal(user) {
-  showApp();
-  
-  const body = `
-    <div class="form-group" style="margin-bottom:16px;">
-      <label class="form-label" for="onboard-name" style="margin-bottom:8px;display:block;">Enter your Full Name to complete setup:</label>
-      <input type="text" class="form-input" id="onboard-name" placeholder="John Doe" required style="width:100%;">
-    </div>
-  `;
-  const footer = `
-    <button class="btn btn-primary btn-full" id="btn-save-onboard" style="width:100%;">Save & Continue</button>
-  `;
-  
-  Modal.open('Welcome to Bunkit!', body, footer);
-  
-  // Disable dismiss behavior
-  $('modal-overlay').style.pointerEvents = 'none';
-  $('modal-close').style.display = 'none';
 
-  $('btn-save-onboard').addEventListener('click', async () => {
-    const name = $('onboard-name').value.trim();
-    if (!name) {
-      showToast('Please enter your name', 'warning');
-      return;
-    }
-    
-    $('btn-save-onboard').textContent = 'Saving...';
-    $('btn-save-onboard').disabled = true;
-    
-    try {
-      await updateProfile(user, { displayName: name });
-      
-      // Update sidebar
-      updateSidebarUser();
-      
-      // Restore modal dismiss behavior
-      $('modal-overlay').style.pointerEvents = '';
-      $('modal-close').style.display = '';
-      
-      Modal.close();
-      showToast(`Welcome, ${name}!`, 'success');
-      
-      // Reload user data just in case
-      await loadUserData(user.uid);
-      showApp();
-    } catch (err) {
-      console.error('Onboarding failed:', err);
-      showToast('Error saving name. Try again.', 'error');
-      $('btn-save-onboard').textContent = 'Save & Continue';
-      $('btn-save-onboard').disabled = false;
-    }
-  });
-}
 
 function init() {
   initEventListeners();
@@ -3031,12 +2987,8 @@ function init() {
       currentUser = user;
       await loadUserData(user.uid);
       
-      if (!user.displayName) {
-        showOnboardingModal(user);
-      } else {
-        showApp();
-        showToast(`Welcome, ${user.displayName || user.email}!`, 'success');
-      }
+      showApp();
+      showToast(`Welcome, ${user.displayName || user.email}!`, 'success');
     } else {
       currentUser = null;
       userData = null;

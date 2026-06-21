@@ -1677,9 +1677,16 @@ function calculateOverallCGPA() {
 }
 
 function applyAccentColor(hexColor) {
+  document.body.style.setProperty('--accent-primary', hexColor);
+  document.body.style.setProperty('--accent-cyan', hexColor);
+  document.body.style.setProperty('--border-focus', hexColor);
+  document.body.style.setProperty('--gradient-primary', `linear-gradient(135deg, ${hexColor}, ${hexColor}cc)`);
+  
+  // Also set on documentElement just in case
   document.documentElement.style.setProperty('--accent-primary', hexColor);
-  document.documentElement.style.setProperty('--accent-hover', hexColor);
-  document.documentElement.style.setProperty('--border-focus', hexColor + '66');
+  document.documentElement.style.setProperty('--accent-cyan', hexColor);
+  document.documentElement.style.setProperty('--border-focus', hexColor);
+  document.documentElement.style.setProperty('--gradient-primary', `linear-gradient(135deg, ${hexColor}, ${hexColor}cc)`);
 }
 
 // ─── RENDER: Settings ───
@@ -2798,17 +2805,43 @@ function initEventListeners() {
   });
 
   const colorPicker = $('settings-theme-color');
+  let tempColor = null;
+  
   if (colorPicker) {
     colorPicker.addEventListener('input', (e) => {
-      const color = e.target.value;
-      if (!userData.settings) userData.settings = {};
-      userData.settings.themeColor = color;
-      applyAccentColor(color);
+      tempColor = e.target.value;
+      applyAccentColor(tempColor);
+      $('theme-color-actions').style.display = 'flex';
     });
     
-    colorPicker.addEventListener('change', (e) => {
+    $('btn-save-theme-color')?.addEventListener('click', () => {
+      if (tempColor) {
+        if (!userData.settings) userData.settings = {};
+        userData.settings.themeColor = tempColor;
+        save();
+        showToast('Theme color saved', 'success');
+      }
+      $('theme-color-actions').style.display = 'none';
+    });
+    
+    $('btn-cancel-theme-color')?.addEventListener('click', () => {
+      const originalColor = userData.settings?.themeColor || '#9efe00';
+      colorPicker.value = originalColor;
+      applyAccentColor(originalColor);
+      tempColor = null;
+      $('theme-color-actions').style.display = 'none';
+    });
+    
+    $('btn-default-theme-color')?.addEventListener('click', () => {
+      const defaultColor = '#9efe00';
+      colorPicker.value = defaultColor;
+      applyAccentColor(defaultColor);
+      if (!userData.settings) userData.settings = {};
+      userData.settings.themeColor = defaultColor;
+      tempColor = null;
       save();
-      showToast('Theme color updated', 'success');
+      $('theme-color-actions').style.display = 'none';
+      showToast('Restored default neon theme', 'success');
     });
   }
 

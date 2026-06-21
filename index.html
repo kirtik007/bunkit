@@ -568,7 +568,14 @@
               </div>
               <div style="display:flex; gap: 12px; align-items:center;" id="theme-color-picker">
                 <input type="color" id="settings-theme-color" style="width: 36px; height: 36px; border: none; border-radius: 50%; cursor: pointer; padding: 0; background: none;">
-                <span class="text-secondary" style="font-size: 0.875rem;">Choose your custom glow</span>
+                <div style="display:flex; flex-direction:column; gap: 6px;">
+                  <span class="text-secondary" style="font-size: 0.875rem;">Choose your custom glow</span>
+                  <div id="theme-color-actions" style="display:none; gap: 8px;">
+                    <button class="btn btn-primary" id="btn-save-theme-color" style="padding: 4px 12px; font-size: 0.75rem; min-width: auto; height: auto;">Done</button>
+                    <button class="btn btn-secondary" id="btn-cancel-theme-color" style="padding: 4px 12px; font-size: 0.75rem; min-width: auto; height: auto;">Cancel</button>
+                  </div>
+                </div>
+                <button class="btn btn-secondary" id="btn-default-theme-color" style="padding: 6px 12px; font-size: 0.75rem; min-width: auto; height: auto; margin-left: auto;" title="Restore original neon theme">Reset</button>
               </div>
             </div>
           </div>

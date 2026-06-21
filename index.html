@@ -90,24 +90,42 @@
 
         <!-- REGISTER FORM -->
         <form class="auth-form hidden" id="register-form" autocomplete="off">
-          <div class="form-group">
-            <label class="form-label" for="register-name">Full Name</label>
-            <input type="text" class="form-input" id="register-name" placeholder="John Doe" required>
+          <div id="register-inputs-group" style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label" for="register-name">Full Name</label>
+              <input type="text" class="form-input" id="register-name" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="register-email">Email Address</label>
+              <input type="email" class="form-input" id="register-email" placeholder="you@college.edu" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="register-password">Password</label>
+              <input type="password" class="form-input" id="register-password" placeholder="Min 6 characters" required minlength="6">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="register-confirm">Confirm Password</label>
+              <input type="password" class="form-input" id="register-confirm" placeholder="Re-enter password" required>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="register-email">Email Address</label>
-            <input type="email" class="form-input" id="register-email" placeholder="you@college.edu" required>
+
+          <div id="register-otp-code-group" class="hidden" style="margin-top: 16px; margin-bottom: 24px;">
+            <div style="font-size: 0.9rem; color: var(--text-secondary); text-align: center; margin-bottom: 16px;">
+              Enter the 6-digit verification code sent to your email.
+            </div>
+            <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;" id="register-otp-inputs">
+              <input type="text" class="form-input register-otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+              <input type="text" class="form-input register-otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+              <input type="text" class="form-input register-otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+              <input type="text" class="form-input register-otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+              <input type="text" class="form-input register-otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+              <input type="text" class="form-input register-otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width: 44px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="register-password">Password</label>
-            <input type="password" class="form-input" id="register-password" placeholder="Min 6 characters" required minlength="6">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="register-confirm">Confirm Password</label>
-            <input type="password" class="form-input" id="register-confirm" placeholder="Re-enter password" required>
-          </div>
+
           <div id="register-error" class="form-error hidden"></div>
           <button type="submit" class="btn btn-primary btn-full" id="btn-register">Create Account</button>
+          <button type="button" class="btn btn-secondary btn-full hidden" id="btn-verify-register-otp" style="margin-top: 8px;">Verify & Create Account</button>
         </form>
 
         <!-- FORGOT PASSWORD FORM -->

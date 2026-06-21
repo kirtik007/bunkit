@@ -2349,7 +2349,11 @@ function initEventListeners() {
     }
   });
 
-  // Register
+  // Register variables
+  let currentRegisterOTP = null;
+  let pendingRegisterData = null;
+
+  // Register Form Submission (Step 1: Send OTP)
   $('register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = $('register-name').value.trim();
@@ -2371,9 +2375,61 @@ function initEventListeners() {
       return; 
     }
 
-    btn.textContent = 'Creating account...'; btn.disabled = true;
+    btn.textContent = 'Sending OTP...'; btn.disabled = true;
+    errorEl.classList.add('hidden');
 
     try {
+      // Step 1: Generate OTP and send email
+      currentRegisterOTP = Math.floor(100000 + Math.random() * 900000).toString();
+      pendingRegisterData = { name, email, password };
+      
+      console.log("🔑 [Bunkit Dev Mode] Register OTP: " + currentRegisterOTP);
+      showToast("Sending verification code to your email...", "info");
+      await sendOTPEmail(email, currentRegisterOTP, 'Registration');
+
+      // Hide inputs and show OTP UI
+      $('register-inputs-group').classList.add('hidden');
+      $('register-otp-code-group').classList.remove('hidden');
+      $('btn-register').classList.add('hidden');
+      $('btn-verify-register-otp').classList.remove('hidden');
+      
+      setupOTPAutofocus('.register-otp-box');
+      $$('.register-otp-box')[0].focus();
+      showToast("OTP sent successfully!", "success");
+    } catch (err) {
+      console.error('Registration OTP failed:', err);
+      errorEl.textContent = 'Failed to send verification email. Try again later.';
+      errorEl.classList.remove('hidden');
+    } finally {
+      btn.textContent = 'Create Account'; btn.disabled = false;
+    }
+  });
+
+  // Verify Register OTP & Create Account (Step 2)
+  $('btn-verify-register-otp').addEventListener('click', async () => {
+    const errorEl = $('register-error');
+    let enteredCode = '';
+    $$('.register-otp-box').forEach(input => enteredCode += input.value);
+
+    if (enteredCode.length < 6) {
+      errorEl.textContent = 'Please enter all 6 digits of the OTP.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    if (enteredCode !== currentRegisterOTP) {
+      errorEl.textContent = 'Invalid OTP code. Please check and try again.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    // Valid OTP - Proceed to create account
+    const btn = $('btn-verify-register-otp');
+    btn.textContent = 'Creating account...'; btn.disabled = true;
+    errorEl.classList.add('hidden');
+
+    try {
+      const { email, password, name } = pendingRegisterData;
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName: name });
       
@@ -2386,7 +2442,15 @@ function initEventListeners() {
       };
       
       await setDoc(doc(db, 'users', cred.user.uid), userDocData);
-      errorEl.classList.add('hidden');
+      showToast("Account created successfully!", "success");
+      
+      // Reset form
+      $('register-form').reset();
+      $('register-inputs-group').classList.remove('hidden');
+      $('register-otp-code-group').classList.add('hidden');
+      $('btn-register').classList.remove('hidden');
+      $('btn-verify-register-otp').classList.add('hidden');
+      
     } catch (err) {
       console.error('Registration failed:', err);
       const msg = err.code === 'auth/email-already-in-use' ? 'An account with this email already exists.'
@@ -2395,7 +2459,7 @@ function initEventListeners() {
         : err.message;
       errorEl.textContent = msg; errorEl.classList.remove('hidden');
     } finally {
-      btn.textContent = 'Create Account'; btn.disabled = false;
+      btn.textContent = 'Verify & Create Account'; btn.disabled = false;
     }
   });
 

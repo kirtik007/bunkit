@@ -1279,7 +1279,12 @@ function renderSubjectGradePlanner(sem, sub) {
   const activeGrades = GRADES.filter(g => g.label !== 'U');
   let hasClampedGrade = false;
   
+  const minPassingExam100 = 45;
+  const guaranteedTotal = score + (minPassingExam100 / 100) * maxEndSem;
+  
   activeGrades.forEach(g => {
+    if (guaranteedTotal > g.max && maxEndSem > 0) return;
+
     const minNeeded = g.min;
     const reqMarks = minNeeded - score;
     

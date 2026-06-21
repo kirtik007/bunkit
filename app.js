@@ -164,11 +164,14 @@ async function loadUserData(uid) {
       if (!userData.cgpaHistory) userData.cgpaHistory = [];
       if (!userData.settings) userData.settings = { defaultMinAttendance: 75, theme: 'dark' };
       
-      // Apply theme
+      // Apply theme and color
       if (userData.settings.theme === 'light') {
         document.body.classList.add('theme-light');
       } else {
         document.body.classList.remove('theme-light');
+      }
+      if (userData.settings.themeColor) {
+        applyAccentColor(userData.settings.themeColor);
       }
     } else {
       // New user — create default data
@@ -1673,14 +1676,21 @@ function calculateOverallCGPA() {
   return count > 0 ? totalSGPA / count : 0;
 }
 
+function applyAccentColor(hexColor) {
+  document.documentElement.style.setProperty('--accent-primary', hexColor);
+  document.documentElement.style.setProperty('--accent-hover', hexColor);
+  document.documentElement.style.setProperty('--border-focus', hexColor + '66');
+}
+
 // ─── RENDER: Settings ───
 function renderSettings() {
   $('settings-name').value = currentUser.displayName || '';
   $('settings-email').value = currentUser.email || '';
   $('settings-min-attendance').value = userData.settings.defaultMinAttendance || 75;
   
-  if ($('settings-theme')) {
-    $('settings-theme').value = userData.settings.theme || 'dark';
+  const currentColor = userData.settings.themeColor || '#9efe00';
+  if ($('settings-theme-color')) {
+    $('settings-theme-color').value = currentColor;
   }
 }
 
@@ -2786,6 +2796,21 @@ function initEventListeners() {
     save();
     showToast('Default attendance criteria updated', 'success');
   });
+
+  const colorPicker = $('settings-theme-color');
+  if (colorPicker) {
+    colorPicker.addEventListener('input', (e) => {
+      const color = e.target.value;
+      if (!userData.settings) userData.settings = {};
+      userData.settings.themeColor = color;
+      applyAccentColor(color);
+    });
+    
+    colorPicker.addEventListener('change', (e) => {
+      save();
+      showToast('Theme color updated', 'success');
+    });
+  }
 
   if ($('settings-theme')) {
     $('settings-theme').addEventListener('change', () => {

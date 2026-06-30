@@ -1085,9 +1085,9 @@ p { color: var(--text-secondary); }
 
 .timetable-grid {
   display: grid;
-  grid-template-columns: 80px repeat(6, 1fr);
+  grid-template-columns: 80px repeat(10, 1fr);
   gap: 2px;
-  min-width: 700px;
+  min-width: 1100px;
 }
 
 .timetable-header {
@@ -2096,7 +2096,7 @@ p { color: var(--text-secondary); }
   }
 
   .timetable-grid {
-    min-width: 600px;
+    min-width: 900px;
   }
 
   .auth-card {

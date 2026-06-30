@@ -1123,15 +1123,16 @@ function renderTimetable(sem) {
   const todayDay = getDayOfWeek(getTodayStr());
 
   let html = '<div class="timetable-grid">';
-  html += '<div class="timetable-header">Time</div>';
-  DAY_LABELS.forEach((label, i) => {
-    const isToday = DAYS[i] === todayDay;
-    html += `<div class="timetable-header ${isToday ? 'today' : ''}">${label}</div>`;
+  html += '<div class="timetable-header">Day</div>';
+  TIME_SLOTS.forEach(time => {
+    html += `<div class="timetable-header">${formatTime(time)}</div>`;
   });
 
-  TIME_SLOTS.forEach(time => {
-    html += `<div class="timetable-time">${formatTime(time)}</div>`;
-    DAYS.forEach(day => {
+  DAYS.forEach((day, i) => {
+    const isToday = day === todayDay;
+    html += `<div class="timetable-time ${isToday ? 'today' : ''}" style="${isToday ? 'color: var(--accent-primary); font-weight: 700;' : ''}">${DAY_LABELS[i]}</div>`;
+    
+    TIME_SLOTS.forEach(time => {
       const slots = (timetable[day] || []).filter(s => s.time === time);
       if (slots.length > 0) {
         const sub = getSubject(sem.id, slots[0].subjectId);
@@ -1462,6 +1463,7 @@ function renderMarkAttendance() {
   if (activeSemesters.length === 0) semSelect.innerHTML = '<option value="">No active semesters</option>';
   updateAttendanceList();
 }
+window.updateAttendanceList = updateAttendanceList;
 
 function updateAttendanceList() {
   const date = $('attendance-date').value;
@@ -1587,8 +1589,15 @@ function markAttendance(semId, subjectId, date, slotTime, status, isExtra = fals
     idx = sem.attendance.findIndex(a => a.date === date && a.subjectId === subjectId && a.slotTime === slotTime && !a.isExtra);
   }
 
-  if (idx >= 0) { 
-    sem.attendance[idx].status = status; 
+  if (idx >= 0) {
+    if (sem.attendance[idx].status === status) {
+      // Undo: remove the record entirely if clicking the same status
+      sem.attendance.splice(idx, 1);
+      showToast(`Removed ${STATUS_LABELS[status]} mark`, 'info');
+    } else {
+      sem.attendance[idx].status = status; 
+      showToast(`Marked ${STATUS_LABELS[status]}`, status === 'present' || status === 'onduty' ? 'success' : 'info');
+    }
   } else { 
     if (isExtra) {
       sem.attendance.push({ id: slotTime, date, subjectId, isExtra: true, status });
@@ -1599,7 +1608,11 @@ function markAttendance(semId, subjectId, date, slotTime, status, isExtra = fals
   
   save();
   renderSemesterView();
-  showToast(`Marked ${STATUS_LABELS[status]}`, status === 'present' || status === 'onduty' ? 'success' : 'info');
+  // We already showed toast in the toggle logic above if we modified an existing record.
+  // This toast is just for new records.
+  if (idx === -1) {
+    showToast(`Marked ${STATUS_LABELS[status]}`, status === 'present' || status === 'onduty' ? 'success' : 'info');
+  }
 }
 
 function syncSemesterGPAAndCredits(semId) {

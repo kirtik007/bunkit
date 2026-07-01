@@ -760,33 +760,38 @@ function renderTodayClasses() {
   }
 
   const sortedSlots = [...slots].sort((a, b) => a.time.localeCompare(b.time));
+  const statuses = ['present', 'absent', 'onduty', 'medical', 'cancelled'];
+  
   container.innerHTML = sortedSlots.map(slot => {
     const sub = getSubject(activeSem.id, slot.subjectId);
     if (!sub) return '';
-    const record = (activeSem.attendance || []).find(a => a.date === today && a.subjectId === sub.id && a.slotTime === slot.time);
-    const statusHTML = record
-      ? `<span class="today-class-status log-status ${record.status}">${STATUS_LABELS[record.status]}</span>`
-      : `<span class="today-class-status badge-info" style="background:var(--bg-input);color:var(--text-muted);">Not marked</span>`;
+    const record = (activeSem.attendance || []).find(a => a.date === today && a.subjectId === sub.id && a.slotTime === slot.time && !a.isExtra);
+    const currentStatus = record ? record.status : null;
+    
     return `
-      <div class="today-class-item" data-subject-id="${sub.id}" data-semester-id="${activeSem.id}" style="cursor: pointer; transition: transform 0.2s, background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='var(--bg-card)'">
-        <div class="class-color-bar" style="background:${sub.color}"></div>
-        <div class="today-class-time">${formatTime(slot.time)}</div>
-        <div class="today-class-name">${sub.name}</div>
-        ${statusHTML}
+      <div class="today-class-item" style="display: flex; flex-direction: column; gap: 12px; align-items: stretch;">
+        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+          <div class="class-color-bar" style="background:${sub.color}"></div>
+          <div class="today-class-time">${formatTime(slot.time)}</div>
+          <div class="today-class-name" style="flex: 1; min-width: 150px;">${sub.name}</div>
+        </div>
+        <div class="status-buttons" style="margin-top: 4px;">
+          ${statuses.map(st => `
+            <button class="status-btn ${st} ${currentStatus === st ? 'active-' + st : ''}" 
+                    onclick="window.markAttendance('${activeSem.id}', '${sub.id}', '${today}', '${slot.time}', '${st}', false); setTimeout(window.renderTodayClasses, 50)">
+              ${STATUS_LABELS[st]}
+            </button>
+          `).join('')}
+        </div>
       </div>`;
   }).join('');
   
-  $$('.today-class-item', container).forEach(item => {
-    item.addEventListener('click', () => {
-      currentSemesterId = item.dataset.semesterId;
-      currentSubjectId = item.dataset.subjectId;
-      renderSubjectDetail();
-      showScreen('subject');
-    });
-  });
+  // No longer redirect to subject page on click, since they interact with buttons now.
+  // Code removed
   
   section.classList.remove('hidden');
 }
+window.renderTodayClasses = renderTodayClasses;
 
 function renderSemestersGrid() {
   const container = $('semesters-grid');
@@ -1195,6 +1200,7 @@ function renderHolidays(sem) {
 
 // ─── RENDER: Subject Detail ───
 function renderSubjectDetail() {
+  window.selectedSubjectCalendarDate = null;
   const sem = getSemester(currentSemesterId);
   const sub = getSubject(currentSemesterId, currentSubjectId);
   if (!sem || !sub) return;
@@ -1416,10 +1422,22 @@ function renderSubjectCalendar(sem, sub) {
       else if (dayRecords.some(r => r.status === 'medical')) statusClass = 'medical';
       else if (dayRecords.every(r => r.status === 'cancelled')) statusClass = 'cancelled';
     }
-    html += `<div class="calendar-day ${statusClass} ${isToday ? 'today' : ''}" data-date="${dateStr}">${d}</div>`;
+    html += `<div class="calendar-day ${statusClass} ${isToday ? 'today' : ''} ${window.selectedSubjectCalendarDate === dateStr ? 'selected' : ''}" data-date="${dateStr}" style="cursor: pointer;">${d}</div>`;
   }
   html += '</div>';
   container.innerHTML = html;
+
+  $$('.calendar-day:not(.empty)', container).forEach(el => {
+    el.addEventListener('click', () => {
+      if (window.selectedSubjectCalendarDate === el.dataset.date) {
+        window.selectedSubjectCalendarDate = null;
+      } else {
+        window.selectedSubjectCalendarDate = el.dataset.date;
+      }
+      renderSubjectCalendar(sem, sub);
+      renderSubjectLog(sem, sub);
+    });
+  });
 
   $('cal-prev').addEventListener('click', () => {
     calendarMonth--; if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
@@ -1433,10 +1451,19 @@ function renderSubjectCalendar(sem, sub) {
 
 function renderSubjectLog(sem, sub) {
   const container = $('subject-log');
-  const records = (sem.attendance || []).filter(a => a.subjectId === sub.id).sort((a, b) => b.date.localeCompare(a.date));
+  let records = (sem.attendance || []).filter(a => a.subjectId === sub.id);
+  
+  if (window.selectedSubjectCalendarDate) {
+    records = records.filter(a => a.date === window.selectedSubjectCalendarDate);
+  }
+  records.sort((a, b) => b.date.localeCompare(a.date));
 
   if (records.length === 0) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><h3>No records yet</h3><p>Mark your attendance to see the log.</p></div>';
+    if (window.selectedSubjectCalendarDate) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><h3>No records</h3><p>No attendance was marked on this day.</p></div>';
+    } else {
+      container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><h3>No records yet</h3><p>Mark your attendance to see the log.</p></div>';
+    }
     return;
   }
   container.innerHTML = records.map(r => `

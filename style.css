@@ -1235,6 +1235,12 @@ p { color: var(--text-secondary); }
 
 .calendar-day.empty { cursor: default; }
 
+.calendar-day.selected {
+  border: 2px solid var(--accent-primary);
+  background: var(--bg-card-hover);
+  opacity: 1;
+}
+
 .calendar-day.today {
   border-color: var(--accent-cyan);
   font-weight: 700;
@@ -2104,7 +2110,8 @@ p { color: var(--text-secondary); }
   }
 
   .status-buttons {
-    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .calc-cards {
